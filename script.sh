@@ -1,0 +1,8 @@
+IMAGE_NAME="order_service"
+USER_NAME="geekboii"
+VERSION="0.0.2"
+
+
+docker build -t $IMAGE_NAME:$VERSION .
+docker tag $IMAGE_NAME:$VERSION $USER_NAME/$IMAGE_NAME:$VERSION
+docker push $USER_NAME/$IMAGE_NAME:$VERSION
