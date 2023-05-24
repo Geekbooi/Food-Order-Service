@@ -3,7 +3,9 @@ package jaguides.springboottransaction.controller;
 import jaguides.springboottransaction.dto.OrderRequest;
 import jaguides.springboottransaction.dto.OrderResponse;
 import jaguides.springboottransaction.entity.Order;
+import jaguides.springboottransaction.service.CartService;
 import jaguides.springboottransaction.service.OrderService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 public class OrderController {
 
     private OrderService orderService;
+    @Autowired
+    private CartService cartService;
 
     @GetMapping("/healthCheck")
     public ResponseEntity<?> healthCheck(){
@@ -29,6 +33,7 @@ public class OrderController {
     @GetMapping("/{orderId}")
     public ResponseEntity<Order> getOrder(@PathVariable String orderId) {
         Order order = orderService.getOrder(orderId);
+        order.setShoppingCart(cartService.getShoppingCartById(order.getShoppingCartId()));
         if (order != null) {
             return ResponseEntity.ok(order);
         } else {

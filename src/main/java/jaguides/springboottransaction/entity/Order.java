@@ -34,4 +34,8 @@ public class Order {
     private LocalTime lastUpdated;
     private Long shoppingCartId;
 
+    @Transient
+    private ShoppingCart shoppingCart ;
+
+
 }
