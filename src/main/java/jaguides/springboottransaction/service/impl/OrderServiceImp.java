@@ -1,5 +1,6 @@
 package jaguides.springboottransaction.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jaguides.springboottransaction.dto.OrderRequest;
 import jaguides.springboottransaction.dto.OrderResponse;
 import jaguides.springboottransaction.entity.*;
@@ -10,7 +11,6 @@ import jaguides.springboottransaction.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -20,11 +20,14 @@ public class OrderServiceImp implements OrderService {
 
     private final OrderRepository orderRepository;
     private final PaymentRepository paymentRepository;
+    @Autowired
+    private final KafkaSender kafkaSender;
 
     @Autowired
-    public OrderServiceImp(OrderRepository orderRepository, PaymentRepository paymentRepository) {
+    public OrderServiceImp(OrderRepository orderRepository, PaymentRepository paymentRepository, KafkaSender kafkaSender) {
         this.orderRepository = orderRepository;
         this.paymentRepository = paymentRepository;
+        this.kafkaSender = kafkaSender;
     }
 
     @Transactional(rollbackFor = PaymentException.class)
@@ -48,6 +51,16 @@ public class OrderServiceImp implements OrderService {
         orderResponse.setStatus(order.getStatus());
         orderResponse.setId(order.getId());
         orderResponse.setMessage("SUCCESS");
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String orderAsString = null;
+        try {
+            orderAsString = objectMapper.writeValueAsString(orderAsString);
+            kafkaSender.sendMessage("receipt", orderAsString);
+
+        } catch (Exception e) {
+            System.out.println("Unable to convert to string");
+        }
 
         return orderResponse;
     }
@@ -75,9 +88,8 @@ public class OrderServiceImp implements OrderService {
         }
         return false;
     }
-//    public void sendNotification(String notification) {
-//        String topic = "notification-topic";
-//        kafkaSender.sendMessage(topic, notification);
-//    }
+    public void sendNotification(String notification) {
+        String topic = "receipt";
+    }
 
 }
