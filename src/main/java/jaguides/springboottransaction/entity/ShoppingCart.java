@@ -15,9 +15,8 @@ import java.util.List;
 
 public class ShoppingCart {
     private String Id;
-    private List<CartItem> items = new ArrayList<>();
-
-    public void addItem(CartItem item) {
+    private List<ItemRequest> items = new ArrayList<>();
+    public void addItem(ItemRequest item) {
         items.add(item);
     }
 

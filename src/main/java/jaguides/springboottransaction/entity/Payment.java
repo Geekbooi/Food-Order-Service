@@ -23,6 +23,5 @@ public class Payment {
     private int expiryMonth;
     private int cvc;
     private Long orderId;
-
-
+    private String paymentStatus;
 }

@@ -2,32 +2,32 @@ package jaguides.springboottransaction.service.impl;
 
 import jaguides.springboottransaction.dto.OrderRequest;
 import jaguides.springboottransaction.dto.OrderResponse;
-import jaguides.springboottransaction.entity.Order;
-import jaguides.springboottransaction.entity.Payment;
+import jaguides.springboottransaction.entity.*;
 import jaguides.springboottransaction.exception.PaymentException;
 import jaguides.springboottransaction.repository.OrderRepository;
 import jaguides.springboottransaction.repository.PaymentRepository;
 import jaguides.springboottransaction.service.OrderService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Optional;
 import java.util.UUID;
 
-
 @Service
 public class OrderServiceImp implements OrderService {
-    private OrderRepository orderRepository;
-    private PaymentRepository paymentRepository;
 
+    private final OrderRepository orderRepository;
+    private final PaymentRepository paymentRepository;
+
+    @Autowired
     public OrderServiceImp(OrderRepository orderRepository, PaymentRepository paymentRepository) {
         this.orderRepository = orderRepository;
         this.paymentRepository = paymentRepository;
     }
 
-    //@Transactional(rollbackFor = PaymentException.class)
-    @Transactional
+    @Transactional(rollbackFor = PaymentException.class)
     @Override
     public OrderResponse placeOrder(OrderRequest orderRequest) {
         Order order = orderRequest.getOrder();
@@ -65,4 +65,19 @@ public class OrderServiceImp implements OrderService {
         }
         return false;
     }
+
+    public boolean deleteOrder(String orderId) {
+        Optional<Order> optionalOrder = orderRepository.findById(orderId);
+        if (optionalOrder.isPresent()) {
+            Order order = optionalOrder.get();
+            orderRepository.delete(order);
+            return true;
+        }
+        return false;
+    }
+//    public void sendNotification(String notification) {
+//        String topic = "notification-topic";
+//        kafkaSender.sendMessage(topic, notification);
+//    }
+
 }
